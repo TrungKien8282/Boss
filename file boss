@@ -1,5 +1,11 @@
 -- by : K7n
 
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local placeId = game.PlaceId
 local zones = workspace:WaitForChild("BossZones")
 
 local function createESP(zone,island)
@@ -24,7 +30,6 @@ end
 local function check()
 
     for _,island in pairs(zones:GetChildren()) do
-
         local spawn = island:FindFirstChild("BossSpawnZone")
 
         if spawn then
@@ -32,12 +37,44 @@ local function check()
                 createESP(spawn,island.Name)
             end
         end
-
     end
 
 end
 
--- kiểm tra liên tục
-while task.wait(1) do
-    pcall(check)
+-- kiểm tra boss
+task.spawn(function()
+    while task.wait(1) do
+        pcall(check)
+    end
+end)
+
+-- đổi server
+local function hop()
+
+    local s = HttpService:JSONDecode(game:HttpGet(
+        "https://games.roblox.com/v1/games/"..placeId.."/servers/Public?sortOrder=Asc&limit=100"
+    ))
+
+    for _,v in pairs(s.data) do
+        if v.playing < v.maxPlayers and v.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(placeId,v.id,player)
+            break
+        end
+    end
+
 end
+
+-- GUI nút hop
+local gui = Instance.new("ScreenGui",game.CoreGui)
+local b = Instance.new("TextButton",gui)
+
+b.Size = UDim2.new(0,120,0,40)
+b.Position = UDim2.new(0,10,0,10)
+b.Text = "Hop Server"
+b.TextScaled = true
+b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+b.TextColor3 = Color3.new(1,1,1)
+
+b.MouseButton1Click:Connect(function()
+    hop()
+end)
