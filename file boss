@@ -1,0 +1,43 @@
+-- by : K7n
+
+local zones = workspace:WaitForChild("BossZones")
+
+local function createESP(zone,island)
+
+    local bill = Instance.new("BillboardGui")
+    bill.Name = "K7N_ESP"
+    bill.Size = UDim2.new(0,160,0,40)
+    bill.AlwaysOnTop = true
+    bill.Adornee = zone
+    bill.Parent = zone
+
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1,0,1,0)
+    text.BackgroundTransparency = 1
+    text.Text = "BOSS : "..island
+    text.TextColor3 = Color3.fromRGB(255,0,0)
+    text.TextScaled = true
+    text.Parent = bill
+
+end
+
+local function check()
+
+    for _,island in pairs(zones:GetChildren()) do
+
+        local spawn = island:FindFirstChild("BossSpawnZone")
+
+        if spawn then
+            if not spawn:FindFirstChild("K7N_ESP") then
+                createESP(spawn,island.Name)
+            end
+        end
+
+    end
+
+end
+
+-- kiểm tra liên tục
+while task.wait(1) do
+    pcall(check)
+end
