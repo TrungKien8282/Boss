@@ -1,0 +1,99 @@
+-- by : K7n💫
+
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+local placeId = game.PlaceId
+
+local function notify(t)
+    StarterGui:SetCore("SendNotification",{
+        Title = "Boss Checker | K7n💫",
+        Text = t,
+        Duration = 4
+    })
+end
+
+local function tpa(part)
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.CFrame = part.CFrame + Vector3.new(0,3,0)
+    end
+end
+
+local function hop()
+    local s = HttpService:JSONDecode(game:HttpGet(
+        "https://games.roblox.com/v1/games/"..placeId.."/servers/Public?sortOrder=Asc&limit=100"
+    ))
+    for _,v in pairs(s.data) do
+        if v.playing < v.maxPlayers and v.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(placeId,v.id,player)
+            break
+        end
+    end
+end
+
+local function check()
+
+    local z = workspace:FindFirstChild("BossZones")
+    if not z then return false end
+
+    if z["Island 1"] and z["Island 1"]:FindFirstChild("BossSpawnZone") then
+        notify("Boss ở Island 1")
+        tpa(workspace.BossZones["Island 1"].Part)
+        return true
+    end
+
+    if z["Island 2"] and z["Island 2"]:FindFirstChild("BossSpawnZone") then
+        notify("Boss ở Island 2")
+        tpa(workspace.Map:GetChildren()[6]:GetChildren()[5].CampFire.Campfire)
+        return true
+    end
+
+    if z["Island 3"] and z["Island 3"]:FindFirstChild("BossSpawnZone") then
+        notify("Boss ở Island 3")
+        tpa(workspace.BossZones["Island 3"].Part)
+        return true
+    end
+
+    if z["Island 4"] and z["Island 4"]:FindFirstChild("BossSpawnZone") then
+        notify("Boss ở Island 4")
+        tpa(workspace.Map.dao4.Docks:GetChildren()[12])
+        return true
+    end
+
+    if z["Island 5"] and z["Island 5"]:FindFirstChild("BossSpawnZone") then
+        notify("Boss ở Island 5")
+        tpa(workspace.BossZones["Island 5"].Part)
+        return true
+    end
+
+    return false
+end
+
+-- check nhanh ngay khi vào
+task.spawn(function()
+    task.wait(1)
+    if not check() then
+        notify("Không có boss -> hop server")
+        hop()
+    end
+end)
+
+-- nút hop server góc trên
+local gui = Instance.new("ScreenGui",game.CoreGui)
+local b = Instance.new("TextButton",gui)
+
+b.Size = UDim2.new(0,120,0,40)
+b.Position = UDim2.new(0,10,0,10)
+b.Text = "Hop Server"
+b.TextScaled = true
+b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+b.TextColor3 = Color3.new(1,1,1)
+
+b.MouseButton1Click:Connect(function()
+    notify("Đang đổi server...")
+    hop()
+end)
